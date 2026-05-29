@@ -41,9 +41,17 @@ const COMMAND_CONFIG = {
   },
 };
 
-function CommandBlock({ cmd, index, onRemove, isExecuting, executingIndex, isDisabled }) {
+function CommandBlock({
+  cmd,
+  index,
+  onRemove,
+  isExecuting,
+  executingIndex,
+  isDisabled,
+}) {
   const config = COMMAND_CONFIG[cmd.type];
   if (!config) return null;
+
   const Icon = config.icon;
   const isActive = isExecuting && executingIndex === index;
 
@@ -62,11 +70,16 @@ function CommandBlock({ cmd, index, onRemove, isExecuting, executingIndex, isDis
     >
       <Icon className="w-4 h-4 shrink-0" />
       <span className="font-medium flex-1">{config.label}</span>
+
       {cmd.type === "repeat" && (
-        <Badge variant="outline" className="text-[10px] border-white/30 text-white">
+        <Badge
+          variant="outline"
+          className="text-[10px] border-white/30 text-white"
+        >
           {cmd.times || 2}x
         </Badge>
       )}
+
       {!isDisabled && (
         <button
           onClick={() => onRemove(index)}
@@ -100,7 +113,7 @@ export default function CommandPanel({
     if (isDisabled) return;
 
     if (isAddingRepeat) {
-      if (type === "repeat") return; // no nested repeats
+      if (type === "repeat") return;
       setRepeatChildren((prev) => [...prev, { type }]);
       return;
     }
@@ -115,6 +128,7 @@ export default function CommandPanel({
       if (c.type === "repeat") return acc + 1 + (c.children?.length || 0);
       return acc + 1;
     }, 0);
+
     if (flatCount >= maxCommands) return;
 
     setCommands((prev) => [...prev, { type }]);
@@ -125,10 +139,12 @@ export default function CommandPanel({
       setIsAddingRepeat(false);
       return;
     }
+
     setCommands((prev) => [
       ...prev,
       { type: "repeat", times: repeatTimes, children: repeatChildren },
     ]);
+
     setIsAddingRepeat(false);
     setRepeatChildren([]);
     setRepeatTimes(2);
@@ -144,22 +160,6 @@ export default function CommandPanel({
     setCommands([]);
     setIsAddingRepeat(false);
     setRepeatChildren([]);
-  };
-
-  // Calculate expanded command count for the executing index highlight
-  let expandedIdx = 0;
-  const getExpandedRange = () => {
-    let idx = 0;
-    for (const cmd of commands) {
-      if (cmd.type === "repeat") {
-        const inner = cmd.children?.length || 0;
-        const total = (cmd.times || 2) * inner;
-        idx += total;
-      } else {
-        idx++;
-      }
-    }
-    return idx;
   };
 
   return (
@@ -179,11 +179,13 @@ export default function CommandPanel({
         <p className="text-[10px] font-space text-muted-foreground mb-2 uppercase tracking-wider">
           {isAddingRepeat ? "Adicionar ao loop:" : "Comandos disponíveis:"}
         </p>
+
         <div className="grid grid-cols-2 gap-1.5">
           {availableCommands.map((type) => {
             const config = COMMAND_CONFIG[type];
             const Icon = config.icon;
             const disabled = isDisabled || (isAddingRepeat && type === "repeat");
+
             return (
               <button
                 key={type}
@@ -213,6 +215,7 @@ export default function CommandPanel({
               <span className="text-[10px] font-space text-amber-300 uppercase">
                 Loop - Repetir
               </span>
+
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => setRepeatTimes(Math.max(2, repeatTimes - 1))}
@@ -220,9 +223,11 @@ export default function CommandPanel({
                 >
                   <Minus className="w-3 h-3 text-amber-200" />
                 </button>
+
                 <span className="text-sm font-bold text-amber-200 w-6 text-center font-space">
                   {repeatTimes}x
                 </span>
+
                 <button
                   onClick={() => setRepeatTimes(Math.min(9, repeatTimes + 1))}
                   className="w-5 h-5 rounded bg-amber-800 flex items-center justify-center"
@@ -231,6 +236,7 @@ export default function CommandPanel({
                 </button>
               </div>
             </div>
+
             <div className="space-y-1 mb-2 min-h-[32px]">
               {repeatChildren.length === 0 ? (
                 <p className="text-[10px] text-amber-400/50 text-center py-1 font-space">
@@ -240,6 +246,7 @@ export default function CommandPanel({
                 repeatChildren.map((c, i) => {
                   const cfg = COMMAND_CONFIG[c.type];
                   const Ic = cfg.icon;
+
                   return (
                     <div
                       key={i}
@@ -252,6 +259,7 @@ export default function CommandPanel({
                 })
               )}
             </div>
+
             <div className="flex gap-1.5">
               <Button
                 size="sm"
@@ -264,6 +272,7 @@ export default function CommandPanel({
               >
                 Cancelar
               </Button>
+
               <Button
                 size="sm"
                 onClick={confirmRepeat}
@@ -290,11 +299,13 @@ export default function CommandPanel({
                   executingIndex={executingIndex}
                   isDisabled={isDisabled}
                 />
+
                 {cmd.type === "repeat" && cmd.children && (
                   <div className="ml-4 mt-1 pl-2 border-l-2 border-amber-500/40 space-y-1">
                     {cmd.children.map((child, ci) => {
                       const cfg = COMMAND_CONFIG[child.type];
                       const Ic = cfg.icon;
+
                       return (
                         <div
                           key={ci}
@@ -305,7 +316,11 @@ export default function CommandPanel({
                         </div>
                       );
                     })}
-                    <Badge variant="outline" className="text-[9px] border-amber-500/30 text-amber-400">
+
+                    <Badge
+                      variant="outline"
+                      className="text-[9px] border-amber-500/30 text-amber-400"
+                    >
                       Repetir {cmd.times}x
                     </Badge>
                   </div>
@@ -313,6 +328,7 @@ export default function CommandPanel({
               </div>
             ))}
           </AnimatePresence>
+
           {commands.length === 0 && !isAddingRepeat && (
             <p className="text-center text-muted-foreground/50 text-xs py-6 font-space">
               Adicione comandos acima
@@ -328,11 +344,31 @@ export default function CommandPanel({
             <Button
               onClick={() => onExecute(commands)}
               disabled={commands.length === 0}
-              className="w-full h-11 bg-primary hover:bg-primary/80 text-primary-foreground font-orbitron font-bold text-sm tracking-wider gap-2"
+              className="
+                w-full h-12
+                rounded-xl
+                bg-cyan-400
+                text-slate-950
+                border border-cyan-200
+                font-orbitron font-black text-sm tracking-[0.18em]
+                uppercase
+                gap-2
+                shadow-[0_0_22px_rgba(34,211,238,0.45)]
+                hover:bg-cyan-300
+                hover:shadow-[0_0_32px_rgba(34,211,238,0.65)]
+                active:scale-[0.98]
+                transition-all duration-200
+                disabled:bg-slate-800
+                disabled:text-cyan-200/40
+                disabled:border-cyan-500/20
+                disabled:shadow-none
+                disabled:cursor-not-allowed
+              "
             >
               <Play className="w-5 h-5" />
               EXECUTAR
             </Button>
+
             <Button
               variant="outline"
               onClick={clearAll}
@@ -344,6 +380,7 @@ export default function CommandPanel({
             </Button>
           </>
         )}
+
         {(gameState === "won" || gameState === "lost") && (
           <Button
             onClick={onReset}
